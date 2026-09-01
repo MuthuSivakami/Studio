@@ -1,0 +1,1062 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>StudioFlow Pro — Multi-Service Studio & Calendar Management</title>
+  
+  <!-- Google Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=Outfit:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+  
+  <!-- Bootstrap 5.3.3 CSS -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+  
+  <!-- Font Awesome 6.5.2 -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
+  
+  <!-- Animate.css for smooth transitions -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css"/>
+  
+  <!-- Custom Advanced CSS -->
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body class="theme-dark desktop-mode" id="appBody">
+
+  <!-- TOP APP SWITCHER & ENVIRONMENT BAR -->
+  <header class="top-device-bar px-3 py-2 d-flex justify-content-between align-items-center border-bottom">
+    <div class="d-flex align-items-center gap-3">
+      <div class="brand-badge d-flex align-items-center gap-2">
+        <div class="logo-box">
+          <i class="fa-solid fa-camera-retro"></i>
+        </div>
+        <div>
+          <span class="fw-bold tracking-tight text-gradient">StudioFlow Pro</span>
+          <span class="badge bg-primary-subtle text-primary ms-1 d-none d-sm-inline-block">v3.5 Multi-Service</span>
+        </div>
+      </div>
+      <div class="system-status d-none d-md-flex align-items-center gap-2 text-muted small">
+        <span class="status-dot pulse-green"></span> Live Studio Ops
+      </div>
+    </div>
+
+    <!-- Center: Viewport Mode Switcher (Allows testing Desktop vs Mobile explicitly or Auto) -->
+    <div class="device-switcher-pill btn-group p-1 bg-surface-2 rounded-pill" role="group">
+      <button type="button" class="btn btn-sm rounded-pill active" id="btnViewDesktop" onclick="setDeviceMode('desktop')">
+        <i class="fa-solid fa-desktop me-1"></i> <span class="d-none d-sm-inline">Desktop Studio</span>
+      </button>
+      <button type="button" class="btn btn-sm rounded-pill" id="btnViewMobile" onclick="setDeviceMode('mobile')">
+        <i class="fa-solid fa-mobile-screen-button me-1"></i> <span class="d-none d-sm-inline">Mobile App View</span>
+      </button>
+      <button type="button" class="btn btn-sm rounded-pill" id="btnViewAuto" onclick="setDeviceMode('auto')">
+        <i class="fa-solid fa-arrows-split-up-and-left me-1"></i> <span class="d-none d-sm-inline">Responsive</span>
+      </button>
+    </div>
+
+    <!-- Right Quick Actions -->
+    <div class="d-flex align-items-center gap-2">
+      <button class="btn btn-sm btn-outline-custom text-nowrap d-none d-md-inline-flex align-items-center gap-2" onclick="openNewBookingModal()">
+        <i class="fa-solid fa-plus text-primary"></i> <span>New Booking</span>
+      </button>
+      
+      <button class="btn btn-sm btn-icon rounded-circle" id="themeToggleBtn" onclick="toggleTheme()" title="Toggle Theme">
+        <i class="fa-solid fa-sun text-warning" id="themeIcon"></i>
+      </button>
+
+      <div class="dropdown">
+        <button class="btn btn-sm btn-user-pill dropdown-toggle d-flex align-items-center gap-2" data-bs-toggle="dropdown">
+          <img src="https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=100" alt="Avatar" class="avatar-sm rounded-circle" style="width: 28px; height: 28px; object-fit: cover;">
+          <span class="d-none d-lg-inline small fw-semibold">Rohan Sharma</span>
+        </button>
+        <ul class="dropdown-menu dropdown-menu-end shadow-lg border-0 bg-surface-2">
+          <li><h6 class="dropdown-header text-muted">Studio Director</h6></li>
+          <li><a class="dropdown-item" href="#settings" onclick="switchTab('settings')"><i class="fa-solid fa-sliders me-2 text-primary"></i>Studio Settings</a></li>
+          <li><a class="dropdown-item" href="#staff" onclick="switchTab('staff')"><i class="fa-solid fa-users me-2 text-info"></i>Crew Roster</a></li>
+          <li><hr class="dropdown-divider"></li>
+          <li><a class="dropdown-item text-danger" href="javascript:resetSampleData()"><i class="fa-solid fa-arrow-rotate-left me-2"></i>Reset Demo Data</a></li>
+        </ul>
+      </div>
+    </div>
+  </header>
+
+  <!-- MAIN CONTAINER (Supports desktop split and mobile viewport wrapper) -->
+  <div class="app-viewport-wrapper" id="viewportWrapper">
+    
+    <!-- DESKTOP / TABLET SIDEBAR NAVIGATION -->
+    <aside class="desktop-sidebar d-flex flex-column justify-content-between" id="mainSidebar">
+      <div>
+        <div class="sidebar-header p-3 pb-2">
+          <small class="text-uppercase tracking-wider text-muted fw-bold font-mono">Main Operations</small>
+        </div>
+
+        <nav class="nav flex-column sidebar-nav px-2 gap-1">
+          <a class="nav-link active d-flex align-items-center justify-content-between" href="#dashboard" onclick="switchTab('dashboard')">
+            <span class="d-flex align-items-center gap-3">
+              <i class="fa-solid fa-chart-pie nav-icon text-indigo"></i>
+              <span class="nav-label">Dashboard</span>
+            </span>
+            <span class="badge bg-indigo-subtle text-indigo rounded-pill small" id="badgeActiveShoots">4 Today</span>
+          </a>
+
+          <a class="nav-link d-flex align-items-center justify-content-between" href="#calendar" onclick="switchTab('calendar')">
+            <span class="d-flex align-items-center gap-3">
+              <i class="fa-solid fa-calendar-days nav-icon text-rose"></i>
+              <span class="nav-label">Click Calendar</span>
+            </span>
+            <span class="badge bg-rose-subtle text-rose rounded-pill small" id="badgeEventsCount">14 Events</span>
+          </a>
+
+          <a class="nav-link d-flex align-items-center justify-content-between" href="#bookings" onclick="switchTab('bookings')">
+            <span class="d-flex align-items-center gap-3">
+              <i class="fa-solid fa-layer-group nav-icon text-amber"></i>
+              <span class="nav-label">Multi-Service Bookings</span>
+            </span>
+            <span class="badge bg-amber-subtle text-amber rounded-pill small" id="badgeBookingsCount">8</span>
+          </a>
+
+          <a class="nav-link d-flex align-items-center justify-content-between" href="#inquiries" onclick="switchTab('inquiries')">
+            <span class="d-flex align-items-center gap-3">
+              <i class="fa-solid fa-funnel-dollar nav-icon text-emerald"></i>
+              <span class="nav-label">Inquiries & Leads</span>
+            </span>
+            <span class="badge bg-emerald-subtle text-emerald rounded-pill small" id="badgeInquiriesCount">5 New</span>
+          </a>
+
+          <a class="nav-link d-flex align-items-center justify-content-between" href="#customers" onclick="switchTab('customers')">
+            <span class="d-flex align-items-center gap-3">
+              <i class="fa-solid fa-address-book nav-icon text-cyan"></i>
+              <span class="nav-label">Clients CRM</span>
+            </span>
+          </a>
+
+          <div class="sidebar-header p-3 pt-4 pb-2">
+            <small class="text-uppercase tracking-wider text-muted fw-bold font-mono">Team & Revenue</small>
+          </div>
+
+          <a class="nav-link d-flex align-items-center justify-content-between" href="#staff" onclick="switchTab('staff')">
+            <span class="d-flex align-items-center gap-3">
+              <i class="fa-solid fa-id-badge nav-icon text-purple"></i>
+              <span class="nav-label">Crew Assignment & Duty</span>
+            </span>
+            <span class="badge bg-purple-subtle text-purple rounded-pill small">6 Crew</span>
+          </a>
+
+          <a class="nav-link d-flex align-items-center justify-content-between" href="#payments" onclick="switchTab('payments')">
+            <span class="d-flex align-items-center gap-3">
+              <i class="fa-solid fa-receipt nav-icon text-success"></i>
+              <span class="nav-label">Billing & Receipts</span>
+            </span>
+            <span class="badge bg-success-subtle text-success rounded-pill small">₹1.45L Due</span>
+          </a>
+
+          <a class="nav-link d-flex align-items-center justify-content-between" href="#whatsapp" onclick="switchTab('whatsapp')">
+            <span class="d-flex align-items-center gap-3">
+              <i class="fa-brands fa-whatsapp nav-icon text-teal"></i>
+              <span class="nav-label">WhatsApp Dispatch</span>
+            </span>
+            <span class="badge bg-teal-subtle text-teal rounded-pill small">Ready</span>
+          </a>
+        </nav>
+      </div>
+
+      <!-- Studio Quick Stats Widget in Sidebar Footer -->
+      <div class="sidebar-footer p-3 m-2 rounded-3 bg-surface-2 border">
+        <div class="d-flex justify-content-between align-items-center mb-2">
+          <span class="small fw-semibold">Month Goal</span>
+          <span class="small text-primary fw-bold">82% (₹7.8L)</span>
+        </div>
+        <div class="progress progress-sm mb-2" style="height: 6px;">
+          <div class="progress-bar bg-gradient-primary" role="progressbar" style="width: 82%"></div>
+        </div>
+        <div class="d-flex justify-content-between align-items-center text-muted smaller">
+          <span>Target: ₹9.5 Lakhs</span>
+          <span>12 Days Left</span>
+        </div>
+      </div>
+    </aside>
+
+    <!-- CONTENT WRAPPER / STAGE -->
+    <main class="main-content-stage flex-grow-1" id="mainContentStage">
+      
+      <!-- MOBILE APP TOP BAR (Visible only in mobile viewport or mobile mode) -->
+      <div class="mobile-app-header d-none px-3 py-2 border-bottom align-items-center justify-content-between">
+        <div class="d-flex align-items-center gap-2">
+          <div class="mobile-logo-circle">
+            <i class="fa-solid fa-camera text-primary"></i>
+          </div>
+          <div>
+            <h6 class="mb-0 fw-bold" id="mobilePageTitle">Studio Dashboard</h6>
+            <small class="text-muted smaller" id="mobilePageSub">Taj Palace, Delhi • 3 Shoots</small>
+          </div>
+        </div>
+        <div class="d-flex align-items-center gap-2">
+          <button class="btn btn-sm btn-icon-round" onclick="openNewBookingModal()">
+            <i class="fa-solid fa-plus"></i>
+          </button>
+          <button class="btn btn-sm btn-icon-round" onclick="openQuickSearchModal()">
+            <i class="fa-solid fa-magnifying-glass"></i>
+          </button>
+        </div>
+      </div>
+
+      <!-- ========================================================================= -->
+      <!-- TAB 1: DASHBOARD VIEW -->
+      <!-- ========================================================================= -->
+      <section class="tab-pane-section active p-3 p-lg-4" id="viewDashboard">
+        <!-- Top Banner / Summary -->
+        <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-3 mb-4">
+          <div>
+            <h3 class="fw-bold tracking-tight mb-1">Studio Overview & Multi-Service Operations</h3>
+            <p class="text-muted mb-0">Track real-time shoot schedules, assigned specialist crews, and event timelines.</p>
+          </div>
+          <div class="d-flex gap-2 flex-wrap">
+            <button class="btn btn-primary d-inline-flex align-items-center gap-2 shadow-sm" onclick="openNewBookingModal()">
+              <i class="fa-solid fa-calendar-plus"></i>
+              <span>Book Multi-Service Shoot</span>
+            </button>
+            <button class="btn btn-outline-custom d-inline-flex align-items-center gap-2" onclick="switchTab('calendar')">
+              <i class="fa-regular fa-calendar-check"></i>
+              <span>Open Interactive Calendar</span>
+            </button>
+          </div>
+        </div>
+
+        <!-- Metric Stat Cards Grid -->
+        <div class="row g-3 mb-4">
+          <div class="col-6 col-lg-3">
+            <div class="card stat-card border-0 shadow-sm p-3 h-100 position-relative overflow-hidden">
+              <div class="d-flex justify-content-between align-items-start mb-2">
+                <span class="stat-label text-muted small fw-semibold">Total Revenue (Month)</span>
+                <div class="stat-icon-badge bg-primary-subtle text-primary">
+                  <i class="fa-solid fa-indian-rupee-sign"></i>
+                </div>
+              </div>
+              <h3 class="fw-bold mb-1" id="dashTotalRevenue">₹6,85,000</h3>
+              <div class="d-flex align-items-center gap-1 smaller text-success">
+                <i class="fa-solid fa-arrow-trend-up"></i>
+                <span>+18.4% vs last month</span>
+              </div>
+              <div class="stat-glow bg-primary"></div>
+            </div>
+          </div>
+
+          <div class="col-6 col-lg-3">
+            <div class="card stat-card border-0 shadow-sm p-3 h-100 position-relative overflow-hidden">
+              <div class="d-flex justify-content-between align-items-start mb-2">
+                <span class="stat-label text-muted small fw-semibold">Active Bookings</span>
+                <div class="stat-icon-badge bg-rose-subtle text-rose">
+                  <i class="fa-solid fa-clapperboard"></i>
+                </div>
+              </div>
+              <h3 class="fw-bold mb-1" id="dashActiveBookings">8 Shoots</h3>
+              <div class="d-flex align-items-center gap-1 smaller text-muted">
+                <span>24 Line-item services</span>
+              </div>
+              <div class="stat-glow bg-rose"></div>
+            </div>
+          </div>
+
+          <div class="col-6 col-lg-3">
+            <div class="card stat-card border-0 shadow-sm p-3 h-100 position-relative overflow-hidden">
+              <div class="d-flex justify-content-between align-items-start mb-2">
+                <span class="stat-label text-muted small fw-semibold">Pending Balance</span>
+                <div class="stat-icon-badge bg-amber-subtle text-amber">
+                  <i class="fa-solid fa-wallet"></i>
+                </div>
+              </div>
+              <h3 class="fw-bold mb-1 text-amber" id="dashPendingBalance">₹2,10,000</h3>
+              <div class="d-flex align-items-center gap-1 smaller text-muted">
+                <span>From 5 clients</span>
+              </div>
+              <div class="stat-glow bg-amber"></div>
+            </div>
+          </div>
+
+          <div class="col-6 col-lg-3">
+            <div class="card stat-card border-0 shadow-sm p-3 h-100 position-relative overflow-hidden">
+              <div class="d-flex justify-content-between align-items-start mb-2">
+                <span class="stat-label text-muted small fw-semibold">Crew On Duty</span>
+                <div class="stat-icon-badge bg-emerald-subtle text-emerald">
+                  <i class="fa-solid fa-user-check"></i>
+                </div>
+              </div>
+              <h3 class="fw-bold mb-1 text-emerald" id="dashCrewDuty">6 / 6 Assigned</h3>
+              <div class="d-flex align-items-center gap-1 smaller text-emerald">
+                <i class="fa-solid fa-circle-check"></i>
+                <span>Zero schedule conflicts</span>
+              </div>
+              <div class="stat-glow bg-emerald"></div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Main Dashboard Split: Today's Shoots & Calendar Click Peek -->
+        <div class="row g-4 mb-4">
+          <!-- Left 7 cols: Today & Upcoming Multi-Service Shoots -->
+          <div class="col-12 col-xl-7">
+            <div class="card border-0 shadow-sm h-100 bg-surface">
+              <div class="card-header bg-transparent border-0 p-3 pb-0 d-flex justify-content-between align-items-center">
+                <div>
+                  <h5 class="fw-bold mb-0"><i class="fa-solid fa-bolt text-warning me-2"></i>Today & Upcoming Multi-Service Shoots</h5>
+                  <small class="text-muted">Click any shoot to view assigned crew breakdown, call times & WhatsApp</small>
+                </div>
+                <button class="btn btn-sm btn-outline-custom" onclick="switchTab('bookings')">View All (8)</button>
+              </div>
+              <div class="card-body p-3">
+                <div class="list-group list-group-flush gap-3" id="dashUpcomingShootsList">
+                  <!-- Dynamically Rendered via JS -->
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Right 5 cols: Click-To-Schedule Mini Calendar & Quick Service Roster -->
+          <div class="col-12 col-xl-5">
+            <div class="card border-0 shadow-sm h-100 bg-surface">
+              <div class="card-header bg-transparent border-0 p-3 pb-0 d-flex justify-content-between align-items-center">
+                <div>
+                  <h5 class="fw-bold mb-0"><i class="fa-solid fa-calendar-check text-primary me-2"></i>Click-To-Schedule Calendar</h5>
+                  <small class="text-muted">Click any date to inspect or book slots</small>
+                </div>
+                <span class="badge bg-primary rounded-pill small" id="miniCalCurrentMonth">Dec 2024</span>
+              </div>
+              <div class="card-body p-3">
+                <!-- Mini calendar widget -->
+                <div class="mini-calendar-container p-2 rounded-3 border bg-surface-2 mb-3">
+                  <div class="d-flex justify-content-between align-items-center mb-2 px-1">
+                    <button class="btn btn-xs btn-outline-secondary py-0 px-2" onclick="prevMiniMonth()"><i class="fa-solid fa-chevron-left"></i></button>
+                    <span class="fw-bold small" id="miniCalendarTitle">December 2024</span>
+                    <button class="btn btn-xs btn-outline-secondary py-0 px-2" onclick="nextMiniMonth()"><i class="fa-solid fa-chevron-right"></i></button>
+                  </div>
+                  <div class="mini-cal-weekdays d-grid text-center text-muted smaller font-mono mb-1" style="grid-template-columns: repeat(7, 1fr);">
+                    <span>Su</span><span>Mo</span><span>Tu</span><span>We</span><span>Th</span><span>Fr</span><span>Sa</span>
+                  </div>
+                  <div class="mini-cal-grid d-grid text-center gap-1" id="miniCalGrid" style="grid-template-columns: repeat(7, 1fr);">
+                    <!-- Generated via JS -->
+                  </div>
+                </div>
+
+                <!-- Selected Date Quick Inspector -->
+                <div class="selected-date-inspector p-3 rounded-3 border bg-surface-2" id="miniDateInspector">
+                  <div class="d-flex justify-content-between align-items-center mb-2">
+                    <div class="d-flex align-items-center gap-2">
+                      <span class="badge bg-primary" id="inspectorDateBadge">12 Dec</span>
+                      <span class="small fw-bold" id="inspectorDateFull">Thursday, 12 Dec 2024</span>
+                    </div>
+                    <button class="btn btn-xs btn-primary rounded-pill" onclick="bookOnSelectedDate()">
+                      <i class="fa-solid fa-plus me-1"></i> Book Slot
+                    </button>
+                  </div>
+                  <div id="inspectorEventsList" class="smaller">
+                    <!-- Events for selected date -->
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Service Roster & Crew Quick Status Strip -->
+        <div class="card border-0 shadow-sm bg-surface p-3">
+          <div class="d-flex justify-content-between align-items-center mb-3">
+            <div>
+              <h6 class="fw-bold mb-0"><i class="fa-solid fa-users-gear text-info me-2"></i>Crew Duty Status & Service Assignments</h6>
+              <small class="text-muted">Specialist photographers, cinematographers, drone pilots, and makeup stylists</small>
+            </div>
+            <button class="btn btn-sm btn-outline-custom" onclick="switchTab('staff')">Manage Roster</button>
+          </div>
+          <div class="row g-3" id="dashCrewGrid">
+            <!-- Dynamic Crew Cards -->
+          </div>
+        </div>
+      </section>
+
+      <!-- ========================================================================= -->
+      <!-- TAB 2: INTERACTIVE CLICK-BASED CALENDAR (Full calendar engine) -->
+      <!-- ========================================================================= -->
+      <section class="tab-pane-section p-3 p-lg-4" id="viewCalendar">
+        <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-3 mb-3">
+          <div>
+            <h3 class="fw-bold tracking-tight mb-1">Click-Driven Studio Calendar</h3>
+            <p class="text-muted mb-0">Click any date cell or time slot to assign multi-service shoots, check crew conflicts, and view timelines.</p>
+          </div>
+          
+          <div class="d-flex align-items-center gap-2 flex-wrap">
+            <!-- View Mode Switcher -->
+            <div class="btn-group p-1 bg-surface-2 rounded-pill border" role="group">
+              <button class="btn btn-sm rounded-pill active" id="calViewMonthBtn" onclick="setCalendarView('month')">Month</button>
+              <button class="btn btn-sm rounded-pill" id="calViewWeekBtn" onclick="setCalendarView('week')">Week</button>
+              <button class="btn btn-sm rounded-pill" id="calViewDayBtn" onclick="setCalendarView('day')">Day Schedule</button>
+              <button class="btn btn-sm rounded-pill" id="calViewTimelineBtn" onclick="setCalendarView('timeline')">Crew Timeline</button>
+            </div>
+
+            <!-- Service Filter Dropdown -->
+            <select class="form-select form-select-sm bg-surface-2 border text-body w-auto" id="calServiceFilter" onchange="filterCalendarEvents()">
+              <option value="all">All Services</option>
+              <option value="photo">Photography (Traditional/Candid)</option>
+              <option value="cinema">Cinematography / Teaser</option>
+              <option value="makeup">HD Makeup & Styling</option>
+              <option value="drone">Drone Aerial Shots</option>
+            </select>
+
+            <button class="btn btn-primary btn-sm d-inline-flex align-items-center gap-1 shadow-sm" onclick="openNewBookingModal()">
+              <i class="fa-solid fa-plus"></i> <span class="d-none d-sm-inline">New Event</span>
+            </button>
+          </div>
+        </div>
+
+        <!-- Calendar Month Navigation Bar -->
+        <div class="card border-0 shadow-sm bg-surface mb-3 p-2 px-3">
+          <div class="d-flex justify-content-between align-items-center">
+            <div class="d-flex align-items-center gap-2">
+              <button class="btn btn-sm btn-icon border" onclick="navCalendar('prev')"><i class="fa-solid fa-chevron-left"></i></button>
+              <button class="btn btn-sm btn-icon border" onclick="navCalendar('next')"><i class="fa-solid fa-chevron-right"></i></button>
+              <button class="btn btn-sm btn-outline-custom" onclick="navCalendar('today')">Today</button>
+              <h4 class="fw-bold mb-0 ms-2" id="calendarMainHeading">December 2024</h4>
+            </div>
+
+            <div class="d-flex align-items-center gap-3">
+              <div class="d-none d-md-flex align-items-center gap-2 small text-muted">
+                <span class="badge-legend bg-primary"></span> Wedding
+                <span class="badge-legend bg-rose"></span> Pre-Wedding
+                <span class="badge-legend bg-teal"></span> Makeup / Glam
+                <span class="badge-legend bg-amber"></span> Birthday / Corporate
+              </div>
+              <button class="btn btn-xs btn-outline-info rounded-pill" onclick="showCalendarHelp()">
+                <i class="fa-regular fa-lightbulb me-1"></i> Calendar Tips
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <!-- CALENDAR VIEW CONTAINER -->
+        <div class="calendar-card-container card border-0 shadow-sm bg-surface overflow-hidden">
+          
+          <!-- 1. MONTH VIEW -->
+          <div class="calendar-view-pane" id="calMonthView">
+            <div class="cal-header-row d-grid text-center font-mono text-muted py-2 border-bottom fw-bold" style="grid-template-columns: repeat(7, 1fr);">
+              <span>Sunday</span><span>Monday</span><span>Tuesday</span><span>Wednesday</span><span>Thursday</span><span>Friday</span><span>Saturday</span>
+            </div>
+            <div class="cal-body-grid d-grid" id="calMonthGrid" style="grid-template-columns: repeat(7, 1fr);">
+              <!-- 35-42 Date Cells generated via JS -->
+            </div>
+          </div>
+
+          <!-- 2. WEEK VIEW -->
+          <div class="calendar-view-pane d-none" id="calWeekView">
+            <div class="week-time-table" id="calWeekTable">
+              <!-- Rendered via JS -->
+            </div>
+          </div>
+
+          <!-- 3. DAY SCHEDULE VIEW -->
+          <div class="calendar-view-pane d-none" id="calDayView">
+            <div class="day-time-schedule p-3" id="calDaySchedule">
+              <!-- Rendered via JS -->
+            </div>
+          </div>
+
+          <!-- 4. CREW TIMELINE VIEW -->
+          <div class="calendar-view-pane d-none" id="calTimelineView">
+            <div class="crew-timeline-grid p-3" id="calCrewTimeline">
+              <!-- Rendered via JS -->
+            </div>
+          </div>
+        </div>
+
+        <!-- Date Click Event Drawer / Popover Indicator -->
+        <div class="mt-3 p-3 bg-surface-2 rounded-3 border d-flex justify-content-between align-items-center">
+          <div class="d-flex align-items-center gap-2">
+            <i class="fa-solid fa-hand-pointer text-primary"></i>
+            <span class="small text-muted"><strong>Click on any date or time slot:</strong> Instantly schedule shoots, assign crew members, or view multi-service deliverables.</span>
+          </div>
+          <span class="badge bg-secondary-subtle text-body small">Interactive Engine Active</span>
+        </div>
+      </section>
+
+      <!-- ========================================================================= -->
+      <!-- TAB 3: MULTI-SERVICE BOOKINGS MANAGER -->
+      <!-- ========================================================================= -->
+      <section class="tab-pane-section p-3 p-lg-4" id="viewBookings">
+        <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-3 mb-4">
+          <div>
+            <h3 class="fw-bold tracking-tight mb-1">Multi-Service Bookings & Contracts</h3>
+            <p class="text-muted mb-0">Manage complete event packages with multiple service lines, crew dispatch, and status tracking.</p>
+          </div>
+          <div class="d-flex gap-2">
+            <button class="btn btn-primary d-inline-flex align-items-center gap-2" onclick="openNewBookingModal()">
+              <i class="fa-solid fa-plus"></i>
+              <span>Create Multi-Service Booking</span>
+            </button>
+          </div>
+        </div>
+
+        <!-- Filter & Search Tool Bar -->
+        <div class="card border-0 shadow-sm bg-surface p-3 mb-4">
+          <div class="row g-2 align-items-center">
+            <div class="col-12 col-md-4">
+              <div class="input-group input-group-sm">
+                <span class="input-group-text bg-surface-2 border-end-0"><i class="fa-solid fa-magnifying-glass text-muted"></i></span>
+                <input type="text" class="form-control bg-surface-2 border-start-0" id="searchBookingsInput" placeholder="Search client, booking ID, venue, or service..." onkeyup="filterBookingsTable()">
+              </div>
+            </div>
+            <div class="col-6 col-md-3">
+              <select class="form-select form-select-sm bg-surface-2" id="filterBookingStatus" onchange="filterBookingsTable()">
+                <option value="all">All Booking Statuses</option>
+                <option value="confirmed">Confirmed</option>
+                <option value="editing">In Post-Production / Editing</option>
+                <option value="delivered">Delivered</option>
+                <option value="pending">Pending Deposit</option>
+              </select>
+            </div>
+            <div class="col-6 col-md-3">
+              <select class="form-select form-select-sm bg-surface-2" id="filterBookingService" onchange="filterBookingsTable()">
+                <option value="all">All Service Types</option>
+                <option value="photo">Photography Included</option>
+                <option value="cinema">Cinematography Included</option>
+                <option value="makeup">HD Makeup Included</option>
+                <option value="drone">Drone Aerial Included</option>
+              </select>
+            </div>
+            <div class="col-12 col-md-2 text-md-end">
+              <span class="small text-muted" id="bookingsCountText">Showing 8 bookings</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Bookings Cards / Data Table -->
+        <div class="row g-3" id="bookingsContainer">
+          <!-- Rendered dynamically with rich multi-service chips and crew avatars -->
+        </div>
+      </section>
+
+      <!-- ========================================================================= -->
+      <!-- TAB 4: INQUIRIES & LEAD PIPELINE -->
+      <!-- ========================================================================= -->
+      <section class="tab-pane-section p-3 p-lg-4" id="viewInquiries">
+        <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-3 mb-4">
+          <div>
+            <h3 class="fw-bold tracking-tight mb-1">Inquiries & Quote Pipeline</h3>
+            <p class="text-muted mb-0">Capture leads from Instagram, Google, and WhatsApp, configure multi-service packages, and convert with 1-click.</p>
+          </div>
+          <button class="btn btn-primary d-inline-flex align-items-center gap-2" onclick="openNewInquiryModal()">
+            <i class="fa-solid fa-user-plus"></i>
+            <span>Add New Inquiry</span>
+          </button>
+        </div>
+
+        <!-- Kanban Board Pipeline -->
+        <div class="row g-3" id="inquiryKanbanBoard">
+          <!-- Columns: New Leads, Quote Sent, Follow Up, Converted -->
+        </div>
+      </section>
+
+      <!-- ========================================================================= -->
+      <!-- TAB 5: CLIENT CRM DIRECTORY -->
+      <!-- ========================================================================= -->
+      <section class="tab-pane-section p-3 p-lg-4" id="viewCustomers">
+        <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-3 mb-4">
+          <div>
+            <h3 class="fw-bold tracking-tight mb-1">Client CRM & History</h3>
+            <p class="text-muted mb-0">Client records, total lifetime spend, shoot history, and direct WhatsApp / call actions.</p>
+          </div>
+          <button class="btn btn-primary d-inline-flex align-items-center gap-2" onclick="openNewCustomerModal()">
+            <i class="fa-solid fa-plus"></i>
+            <span>Add Client</span>
+          </button>
+        </div>
+
+        <div class="row g-3" id="customersGrid">
+          <!-- Dynamic Client Cards -->
+        </div>
+      </section>
+
+      <!-- ========================================================================= -->
+      <!-- TAB 6: STAFF ROSTER & SERVICE SPECIALISTS -->
+      <!-- ========================================================================= -->
+      <section class="tab-pane-section p-3 p-lg-4" id="viewStaff">
+        <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-3 mb-4">
+          <div>
+            <h3 class="fw-bold tracking-tight mb-1">Crew Roster & Service Specializations</h3>
+            <p class="text-muted mb-0">Manage photographers, cinematographers, drone operators, and makeup artists with assigned shoot counts.</p>
+          </div>
+          <button class="btn btn-primary d-inline-flex align-items-center gap-2" onclick="openNewStaffModal()">
+            <i class="fa-solid fa-user-shield"></i>
+            <span>Add Crew Member</span>
+          </button>
+        </div>
+
+        <div class="row g-3" id="staffRosterGrid">
+          <!-- Dynamic Staff Roster Cards -->
+        </div>
+      </section>
+
+      <!-- ========================================================================= -->
+      <!-- TAB 7: BILLING & PAYMENT RECEIPTS -->
+      <!-- ========================================================================= -->
+      <section class="tab-pane-section p-3 p-lg-4" id="viewPayments">
+        <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-3 mb-4">
+          <div>
+            <h3 class="fw-bold tracking-tight mb-1">Billing, Invoices & Payment Ledger</h3>
+            <p class="text-muted mb-0">Track advances, collect balance payments, and generate printable GST invoices with itemized services.</p>
+          </div>
+          <div class="d-flex gap-2">
+            <button class="btn btn-success d-inline-flex align-items-center gap-2" onclick="openRecordPaymentModal()">
+              <i class="fa-solid fa-hand-holding-dollar"></i>
+              <span>Record Payment</span>
+            </button>
+          </div>
+        </div>
+
+        <!-- Payment Ledger Table -->
+        <div class="card border-0 shadow-sm bg-surface">
+          <div class="card-body p-0">
+            <div class="table-responsive">
+              <table class="table table-hover align-middle mb-0" id="paymentsTable">
+                <thead class="bg-surface-2 text-muted small">
+                  <tr>
+                    <th class="ps-3">Invoice #</th>
+                    <th>Client & Shoot</th>
+                    <th>Assigned Services</th>
+                    <th>Total Package</th>
+                    <th>Advance Paid</th>
+                    <th>Balance Due</th>
+                    <th>Payment Status</th>
+                    <th class="text-end pe-3">Actions</th>
+                  </tr>
+                </thead>
+                <tbody id="paymentsTableBody">
+                  <!-- Dynamic rows -->
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ========================================================================= -->
+      <!-- TAB 8: WHATSAPP AUTOMATION & DISPATCH -->
+      <!-- ========================================================================= -->
+      <section class="tab-pane-section p-3 p-lg-4" id="viewWhatsapp">
+        <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-3 mb-4">
+          <div>
+            <h3 class="fw-bold tracking-tight mb-1">WhatsApp Automation & Crew Dispatch</h3>
+            <p class="text-muted mb-0">Instant 1-click messaging for booking confirmations, crew call sheets, payment reminders & shoot alerts.</p>
+          </div>
+        </div>
+
+        <div class="row g-4">
+          <!-- Left: Select Booking & Template -->
+          <div class="col-12 col-lg-5">
+            <div class="card border-0 shadow-sm bg-surface p-3">
+              <h6 class="fw-bold mb-3"><i class="fa-brands fa-whatsapp text-teal me-2"></i>Quick Dispatch Generator</h6>
+              
+              <div class="mb-3">
+                <label class="form-label small text-muted">Select Target Booking</label>
+                <select class="form-select bg-surface-2" id="waBookingSelect" onchange="updateWhatsAppPreview()">
+                  <!-- Options generated via JS -->
+                </select>
+              </div>
+
+              <div class="mb-3">
+                <label class="form-label small text-muted">Message Template</label>
+                <div class="list-group gap-2" id="waTemplateGroup">
+                  <button type="button" class="list-group-item list-group-item-action active rounded-2 border" onclick="setWaTemplate('confirm', this)">
+                    <div class="fw-semibold">1. Booking Confirmation & Services</div>
+                    <small class="text-muted">Sends client full package breakdown & advance confirmation</small>
+                  </button>
+                  <button type="button" class="list-group-item list-group-item-action rounded-2 border" onclick="setWaTemplate('crew_call', this)">
+                    <div class="fw-semibold">2. Crew Call Sheet & Assignment</div>
+                    <small class="text-muted">Sends assigned photographers/cinematographers venue & timings</small>
+                  </button>
+                  <button type="button" class="list-group-item list-group-item-action rounded-2 border" onclick="setWaTemplate('reminder', this)">
+                    <div class="fw-semibold">3. Shoot Day Reminder</div>
+                    <small class="text-muted">24-hour reminder with arrival time & contact details</small>
+                  </button>
+                  <button type="button" class="list-group-item list-group-item-action rounded-2 border" onclick="setWaTemplate('payment', this)">
+                    <div class="fw-semibold">4. Balance Payment Request</div>
+                    <small class="text-muted">Payment link & invoice summary for pending amounts</small>
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Right: Live WhatsApp Chat Simulator & Send Trigger -->
+          <div class="col-12 col-lg-7">
+            <div class="card border-0 shadow-sm bg-surface p-3">
+              <div class="d-flex justify-content-between align-items-center mb-3">
+                <h6 class="fw-bold mb-0">Live WhatsApp Message Preview</h6>
+                <span class="badge bg-teal-subtle text-teal"><i class="fa-solid fa-check-double me-1"></i>Formatted for WhatsApp</span>
+              </div>
+
+              <div class="whatsapp-preview-box p-3 rounded-3 mb-3" style="background: #0b141a; min-height: 250px; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;">
+                <div class="wa-chat-bubble p-3 rounded-3 text-white" style="background: #005c4b; max-width: 90%; white-space: pre-wrap; font-size: 14px; line-height: 1.4;" id="waMessageContent">
+                  <!-- Live formatted message -->
+                </div>
+              </div>
+
+              <div class="d-flex gap-2">
+                <button class="btn btn-success flex-grow-1 d-flex align-items-center justify-content-center gap-2 py-2" onclick="sendWhatsAppDirect()">
+                  <i class="fa-brands fa-whatsapp fa-lg"></i>
+                  <span>Launch WhatsApp Web / App</span>
+                </button>
+                <button class="btn btn-outline-custom" onclick="copyWhatsAppMessage()">
+                  <i class="fa-regular fa-copy me-1"></i> Copy Text
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ========================================================================= -->
+      <!-- TAB 9: STUDIO SETTINGS -->
+      <!-- ========================================================================= -->
+      <section class="tab-pane-section p-3 p-lg-4" id="viewSettings">
+        <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-3 mb-4">
+          <div>
+            <h3 class="fw-bold tracking-tight mb-1">Studio Configuration</h3>
+            <p class="text-muted mb-0">Configure studio branding, multi-service catalog pricing, and operational settings.</p>
+          </div>
+          <button class="btn btn-primary" onclick="saveStudioSettings()">Save Configuration</button>
+        </div>
+
+        <div class="row g-4">
+          <div class="col-12 col-lg-6">
+            <div class="card border-0 shadow-sm bg-surface p-3">
+              <h6 class="fw-bold mb-3">Studio Brand Profile</h6>
+              <div class="mb-3">
+                <label class="form-label small text-muted">Studio Business Name</label>
+                <input type="text" class="form-control bg-surface-2" id="settingStudioName" value="StudioFlow Creations">
+              </div>
+              <div class="mb-3">
+                <label class="form-label small text-muted">Studio Address / City</label>
+                <input type="text" class="form-control bg-surface-2" id="settingStudioAddress" value="Studio #402, DLF Cyber City, Delhi NCR">
+              </div>
+              <div class="mb-3">
+                <label class="form-label small text-muted">Official WhatsApp / Phone</label>
+                <input type="text" class="form-control bg-surface-2" id="settingStudioPhone" value="+91 98765 00000">
+              </div>
+            </div>
+          </div>
+
+          <div class="col-12 col-lg-6">
+            <div class="card border-0 shadow-sm bg-surface p-3">
+              <h6 class="fw-bold mb-3">Service Catalog & Rates</h6>
+              <div class="list-group list-group-flush gap-2" id="settingsServiceList">
+                <!-- Service rates dynamically rendered -->
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+    </main>
+
+    <!-- MOBILE STICKY BOTTOM NAVIGATION BAR -->
+    <nav class="mobile-bottom-nav d-none justify-content-around align-items-center border-top">
+      <a href="#dashboard" class="mobile-nav-item active" onclick="switchTab('dashboard')">
+        <i class="fa-solid fa-house"></i>
+        <span>Home</span>
+      </a>
+      <a href="#calendar" class="mobile-nav-item" onclick="switchTab('calendar')">
+        <i class="fa-regular fa-calendar"></i>
+        <span>Calendar</span>
+      </a>
+      <button class="mobile-fab-btn" onclick="openNewBookingModal()">
+        <i class="fa-solid fa-plus"></i>
+      </button>
+      <a href="#bookings" class="mobile-nav-item" onclick="switchTab('bookings')">
+        <i class="fa-solid fa-layer-group"></i>
+        <span>Shoots</span>
+      </a>
+      <a href="#more" class="mobile-nav-item" onclick="openMobileMenuSheet()">
+        <i class="fa-solid fa-ellipsis"></i>
+        <span>More</span>
+      </a>
+    </nav>
+
+  </div>
+
+  <!-- ========================================================================= -->
+  <!-- MODAL: MULTI-SERVICE BOOKING CREATOR & ASSIGNMENT ENGINE -->
+  <!-- ========================================================================= -->
+  <div class="modal fade" id="modalBookingForm" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-lg modal-dialog-centered modal-dialog-scrollable">
+      <div class="modal-content bg-surface border-0 shadow-2xl">
+        <div class="modal-header border-bottom p-3">
+          <div class="d-flex align-items-center gap-2">
+            <div class="modal-icon-badge bg-primary-subtle text-primary">
+              <i class="fa-solid fa-calendar-check"></i>
+            </div>
+            <div>
+              <h5 class="modal-title fw-bold" id="bookingModalTitle">Create Multi-Service Booking</h5>
+              <small class="text-muted">Combine photography, video, makeup & drone with dedicated staff</small>
+            </div>
+          </div>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+
+        <div class="modal-body p-3 p-md-4">
+          <form id="bookingForm" onsubmit="event.preventDefault(); handleSaveBooking();">
+            <input type="hidden" id="bookingEditId" value="">
+
+            <!-- 1. Client & Event Basics -->
+            <div class="row g-3 mb-4">
+              <div class="col-12 col-md-6">
+                <label class="form-label small fw-semibold">Client / Couple Name <span class="text-danger">*</span></label>
+                <input type="text" class="form-control bg-surface-2" id="bfClientName" placeholder="e.g. Aarav & Isha" required>
+              </div>
+              <div class="col-12 col-md-6">
+                <label class="form-label small fw-semibold">Phone Number / WhatsApp <span class="text-danger">*</span></label>
+                <input type="tel" class="form-control bg-surface-2" id="bfClientPhone" placeholder="+91 98765 43210" required>
+              </div>
+              <div class="col-12 col-md-4">
+                <label class="form-label small fw-semibold">Event Type</label>
+                <select class="form-select bg-surface-2" id="bfEventType">
+                  <option value="Wedding">Royal Wedding</option>
+                  <option value="Pre-Wedding">Pre-Wedding Shoot</option>
+                  <option value="Engagement">Engagement Ceremony</option>
+                  <option value="Birthday">Birthday / Milestone</option>
+                  <option value="Maternity">Maternity & Baby</option>
+                  <option value="Corporate">Corporate / Brand Event</option>
+                </select>
+              </div>
+              <div class="col-6 col-md-4">
+                <label class="form-label small fw-semibold">Date <span class="text-danger">*</span></label>
+                <input type="date" class="form-control bg-surface-2" id="bfEventDate" required>
+              </div>
+              <div class="col-6 col-md-4">
+                <label class="form-label small fw-semibold">Call Time</label>
+                <input type="time" class="form-control bg-surface-2" id="bfEventTime" value="09:00">
+              </div>
+              <div class="col-12">
+                <label class="form-label small fw-semibold">Venue / Location <span class="text-danger">*</span></label>
+                <input type="text" class="form-control bg-surface-2" id="bfVenue" placeholder="e.g. Taj Palace, Delhi or Studio Suite 1" required>
+              </div>
+            </div>
+
+            <hr class="my-3">
+
+            <!-- 2. MULTI-SERVICE SELECTION & STAFF ASSIGNMENT (Key Highlight) -->
+            <div class="mb-4">
+              <div class="d-flex justify-content-between align-items-center mb-2">
+                <div>
+                  <h6 class="fw-bold mb-0 text-primary"><i class="fa-solid fa-list-check me-2"></i>Multi-Service Selection & Crew Assignment</h6>
+                  <small class="text-muted">Select all services required for this shoot and assign individual specialists</small>
+                </div>
+                <span class="badge bg-primary-subtle text-primary" id="selectedServicesBadgeCount">0 Services Selected</span>
+              </div>
+
+              <!-- Available Services Checklist -->
+              <div class="services-assignment-list d-flex flex-column gap-2" id="modalServicesContainer">
+                <!-- Generated dynamically with service toggles and staff selector dropdowns -->
+              </div>
+            </div>
+
+            <hr class="my-3">
+
+            <!-- 3. Financial Breakdown & Deposit -->
+            <div class="row g-3">
+              <div class="col-12 col-md-4">
+                <label class="form-label small fw-semibold">Total Package Amount (₹)</label>
+                <input type="number" class="form-control bg-surface-2 fw-bold text-primary" id="bfTotalAmount" value="0" readonly>
+                <small class="text-muted smaller">Auto-calculated from selected services</small>
+              </div>
+              <div class="col-6 col-md-4">
+                <label class="form-label small fw-semibold">Advance / Deposit Paid (₹)</label>
+                <input type="number" class="form-control bg-surface-2 fw-bold text-success" id="bfAdvancePaid" value="0" oninput="calculateBalance()">
+              </div>
+              <div class="col-6 col-md-4">
+                <label class="form-label small fw-semibold">Balance Due (₹)</label>
+                <input type="number" class="form-control bg-surface-2 fw-bold text-amber" id="bfBalanceDue" value="0" readonly>
+              </div>
+              <div class="col-12 col-md-6">
+                <label class="form-label small fw-semibold">Booking Status</label>
+                <select class="form-select bg-surface-2" id="bfStatus">
+                  <option value="confirmed">Confirmed (Advance Paid)</option>
+                  <option value="pending">Pending Deposit / Tentative</option>
+                  <option value="editing">In Post-Production / Editing</option>
+                  <option value="delivered">Delivered / Completed</option>
+                </select>
+              </div>
+              <div class="col-12 col-md-6">
+                <label class="form-label small fw-semibold">Internal Notes / Shoot Instructions</label>
+                <input type="text" class="form-control bg-surface-2" id="bfNotes" placeholder="e.g. Drone battery check, traditional attire lighting...">
+              </div>
+            </div>
+          </form>
+        </div>
+
+        <div class="modal-footer border-top p-3 d-flex justify-content-between">
+          <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Cancel</button>
+          <div class="d-flex gap-2">
+            <button type="button" class="btn btn-primary px-4" onclick="handleSaveBooking()">
+              <i class="fa-solid fa-check me-1"></i> Save Booking & Assign Crew
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ========================================================================= -->
+  <!-- MODAL: DATE CLICK EVENT INSPECTOR / QUICK ACTIONS -->
+  <!-- ========================================================================= -->
+  <div class="modal fade" id="modalDayInspector" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-md modal-dialog-centered">
+      <div class="modal-content bg-surface border-0 shadow-2xl">
+        <div class="modal-header border-bottom p-3">
+          <div class="d-flex align-items-center gap-2">
+            <div class="modal-icon-badge bg-rose-subtle text-rose">
+              <i class="fa-solid fa-calendar-day"></i>
+            </div>
+            <div>
+              <h5 class="modal-title fw-bold" id="dayInspectorTitle">Day Schedule — 12 Dec 2024</h5>
+              <small class="text-muted" id="dayInspectorSubtitle">2 Multi-Service Shoots Scheduled</small>
+            </div>
+          </div>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <div class="modal-body p-3" id="dayInspectorBody">
+          <!-- Content populated via JS -->
+        </div>
+        <div class="modal-footer border-top p-3 d-flex justify-content-between">
+          <button type="button" class="btn btn-outline-secondary btn-sm" data-bs-dismiss="modal">Close</button>
+          <button type="button" class="btn btn-primary btn-sm" id="dayInspectorAddBtn" onclick="bookOnInspectedDate()">
+            <i class="fa-solid fa-plus me-1"></i> Add Booking On This Date
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ========================================================================= -->
+  <!-- MODAL: EVENT DETAILS & ASSIGNED CREW BREAKDOWN -->
+  <!-- ========================================================================= -->
+  <div class="modal fade" id="modalEventDetail" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-lg modal-dialog-centered">
+      <div class="modal-content bg-surface border-0 shadow-2xl">
+        <div class="modal-header border-bottom p-3">
+          <div class="d-flex align-items-center gap-2">
+            <div class="modal-icon-badge bg-primary-subtle text-primary">
+              <i class="fa-solid fa-clapperboard"></i>
+            </div>
+            <div>
+              <h5 class="modal-title fw-bold" id="eventDetailTitle">Booking #BK-1024</h5>
+              <small class="text-muted" id="eventDetailSubtitle">Royal Wedding • Taj Palace</small>
+            </div>
+          </div>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <div class="modal-body p-3 p-md-4" id="eventDetailBody">
+          <!-- Populated via JS -->
+        </div>
+        <div class="modal-footer border-top p-3 d-flex justify-content-between">
+          <div class="d-flex gap-2">
+            <button type="button" class="btn btn-outline-danger btn-sm" id="eventDetailDeleteBtn">
+              <i class="fa-solid fa-trash me-1"></i> Delete
+            </button>
+            <button type="button" class="btn btn-outline-custom btn-sm" id="eventDetailEditBtn">
+              <i class="fa-solid fa-pen-to-square me-1"></i> Edit Booking
+            </button>
+          </div>
+          <div class="d-flex gap-2">
+            <button type="button" class="btn btn-success btn-sm" id="eventDetailWaBtn">
+              <i class="fa-brands fa-whatsapp me-1"></i> Send WhatsApp Call Sheet
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ========================================================================= -->
+  <!-- MODAL: PRINTABLE TAX INVOICE & RECEIPT GENERATOR -->
+  <!-- ========================================================================= -->
+  <div class="modal fade" id="modalInvoice" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-lg modal-dialog-centered">
+      <div class="modal-content bg-surface border-0 shadow-2xl">
+        <div class="modal-header border-bottom p-3">
+          <h5 class="modal-title fw-bold"><i class="fa-solid fa-file-invoice text-primary me-2"></i>Studio Tax Invoice & Services Statement</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <div class="modal-body p-4" id="invoicePrintArea">
+          <!-- Printable Invoice Content -->
+        </div>
+        <div class="modal-footer border-top p-3 d-flex justify-content-between">
+          <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Close</button>
+          <button type="button" class="btn btn-primary" onclick="window.print()">
+            <i class="fa-solid fa-print me-1"></i> Print / Download PDF
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ========================================================================= -->
+  <!-- OFFCANVAS: MOBILE MORE MENU & QUICK SWITCHER -->
+  <!-- ========================================================================= -->
+  <div class="offcanvas offcanvas-bottom bg-surface rounded-top-4" tabindex="-1" id="mobileMoreMenuSheet" style="height: 60vh;">
+    <div class="offcanvas-header border-bottom p-3">
+      <h6 class="offcanvas-title fw-bold">Studio Operations & Roster</h6>
+      <button type="button" class="btn-close" data-bs-dismiss="offcanvas" aria-label="Close"></button>
+    </div>
+    <div class="offcanvas-body p-3">
+      <div class="row g-3 text-center">
+        <div class="col-4">
+          <a href="#inquiries" class="mobile-menu-tile p-3 rounded-3 border d-flex flex-column align-items-center gap-2" onclick="switchTab('inquiries'); closeMobileMenu();">
+            <i class="fa-solid fa-funnel-dollar fa-2x text-emerald"></i>
+            <span class="small fw-semibold">Inquiries</span>
+          </a>
+        </div>
+        <div class="col-4">
+          <a href="#customers" class="mobile-menu-tile p-3 rounded-3 border d-flex flex-column align-items-center gap-2" onclick="switchTab('customers'); closeMobileMenu();">
+            <i class="fa-solid fa-address-book fa-2x text-cyan"></i>
+            <span class="small fw-semibold">Clients</span>
+          </a>
+        </div>
+        <div class="col-4">
+          <a href="#staff" class="mobile-menu-tile p-3 rounded-3 border d-flex flex-column align-items-center gap-2" onclick="switchTab('staff'); closeMobileMenu();">
+            <i class="fa-solid fa-id-badge fa-2x text-purple"></i>
+            <span class="small fw-semibold">Crew Duty</span>
+          </a>
+        </div>
+        <div class="col-4">
+          <a href="#payments" class="mobile-menu-tile p-3 rounded-3 border d-flex flex-column align-items-center gap-2" onclick="switchTab('payments'); closeMobileMenu();">
+            <i class="fa-solid fa-receipt fa-2x text-success"></i>
+            <span class="small fw-semibold">Payments</span>
+          </a>
+        </div>
+        <div class="col-4">
+          <a href="#whatsapp" class="mobile-menu-tile p-3 rounded-3 border d-flex flex-column align-items-center gap-2" onclick="switchTab('whatsapp'); closeMobileMenu();">
+            <i class="fa-brands fa-whatsapp fa-2x text-teal"></i>
+            <span class="small fw-semibold">WhatsApp</span>
+          </a>
+        </div>
+        <div class="col-4">
+          <a href="#settings" class="mobile-menu-tile p-3 rounded-3 border d-flex flex-column align-items-center gap-2" onclick="switchTab('settings'); closeMobileMenu();">
+            <i class="fa-solid fa-sliders fa-2x text-amber"></i>
+            <span class="small fw-semibold">Settings</span>
+          </a>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- TOAST CONTAINER FOR NOTIFICATIONS -->
+  <div class="toast-container position-fixed bottom-0 end-0 p-3" id="toastContainer" style="z-index: 1090;"></div>
+
+  <!-- SCRIPTS -->
+  <!-- jQuery 3.7.1 -->
+  <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+  <!-- Bootstrap 5.3.3 JS Bundle -->
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+  <!-- Canvas Confetti -->
+  <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.9.3/dist/confetti.browser.min.js"></script>
+  <!-- Main Application JS -->
+  <script src="app.js"></script>
+</body>
+</html>
