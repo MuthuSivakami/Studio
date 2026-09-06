@@ -352,7 +352,7 @@
   // =========================================================================
 
   window.openNewBookingModal = function(presetDate, presetTime) {
-    $('#bookingEditId').value = '';
+    $('#bookingEditId').val('');
     $('#bookingModalTitle').text('Create Multi-Service Booking');
     $('#bookingForm')[0].reset();
     
@@ -1532,6 +1532,9 @@
     $grid.empty();
 
     CUSTOMERS.forEach(c => {
+      // Find this client's most recent booking (if any) to enable one-click invoicing
+      const clientBooking = BOOKINGS.filter(b => b.customer === c.name).sort((a, b) => (a.date < b.date ? 1 : -1))[0];
+
       const cardHtml = `
         <div class="col-12 col-md-6 col-xl-4">
           <div class="card bg-surface border p-3 rounded-3 shadow-sm h-100">
@@ -1560,6 +1563,9 @@
               <button class="btn btn-sm btn-success flex-grow-1" onclick="directClientWhatsApp('${c.phone}', '${c.name}')">
                 <i class="fa-brands fa-whatsapp me-1"></i> WhatsApp
               </button>
+              ${clientBooking ? `<button class="btn btn-sm btn-outline-custom" onclick="printInvoice('${clientBooking.id}')" title="Generate Invoice">
+                <i class="fa-solid fa-file-invoice"></i>
+              </button>` : ''}
             </div>
           </div>
         </div>
@@ -1649,9 +1655,12 @@
           <td class="text-amber font-mono">₹${b.balanceDue.toLocaleString('en-IN')}</td>
           <td>${statusBadge}</td>
           <td class="text-end pe-3">
-            <button class="btn btn-xs btn-outline-custom" onclick="printInvoice('${b.id}')" title="Print Invoice">
-              <i class="fa-solid fa-print me-1"></i> Invoice
-            </button>
+            <div class="d-flex gap-1 justify-content-end">
+              ${b.balanceDue > 0 ? `<button class="btn btn-xs btn-success" onclick="openRecordPaymentModal('${b.id}')" title="Record Payment"><i class="fa-solid fa-hand-holding-dollar"></i></button>` : ''}
+              <button class="btn btn-xs btn-outline-custom" onclick="printInvoice('${b.id}')" title="Print Invoice">
+                <i class="fa-solid fa-print me-1"></i> Invoice
+              </button>
+            </div>
           </td>
         </tr>
       `;
@@ -1744,6 +1753,242 @@
     $('#invoicePrintArea').html(invoiceHtml);
     const modal = new bootstrap.Modal(document.getElementById('modalInvoice'));
     modal.show();
+  };
+
+  // =========================================================================
+  // 11B. QUICK-ADD MODALS: CLIENTS, INQUIRIES, CREW, PAYMENTS, SEARCH
+  // =========================================================================
+
+  let nextCustomerId = () => (CUSTOMERS.reduce((m, c) => Math.max(m, c.id), 0) + 1);
+  let nextInquiryId = () => (INQUIRIES.reduce((m, i) => Math.max(m, i.id), 0) + 1);
+  let nextStaffId = () => (STAFF_MEMBERS.reduce((m, s) => Math.max(m, s.id), 0) + 1);
+
+  function initialsFromName(name) {
+    return name.split(/\s+/).filter(Boolean).slice(0, 2).map(w => w[0].toUpperCase()).join('') || '?';
+  }
+
+  const AVATAR_COLORS = ['#6366f1', '#14b8a6', '#f59e0b', '#f43f5e', '#8b5cf6', '#06b6d4', '#ec4899', '#e11d48'];
+  function pickAvatarColor() {
+    return AVATAR_COLORS[Math.floor(Math.random() * AVATAR_COLORS.length)];
+  }
+
+  // --- Add New Client ---
+  window.openNewCustomerModal = function() {
+    $('#newCustomerForm')[0].reset();
+    const modal = new bootstrap.Modal(document.getElementById('modalNewCustomer'));
+    modal.show();
+  };
+
+  window.handleSaveCustomer = function(evt) {
+    evt.preventDefault();
+    const name = $('#ncName').val().trim();
+    const phone = $('#ncPhone').val().trim();
+    const email = $('#ncEmail').val().trim();
+    if (!name || !phone) return false;
+
+    CUSTOMERS.push({
+      id: nextCustomerId(),
+      name, phone, email,
+      avatar: initialsFromName(name),
+      color: pickAvatarColor(),
+      totalSpend: '₹0',
+      eventsCount: 0,
+      lastShoot: 'No shoots yet'
+    });
+
+    renderCustomersCRM();
+    bootstrap.Modal.getInstance(document.getElementById('modalNewCustomer')).hide();
+    showToast('Client Added', `${name} has been added to the CRM directory.`, 'success');
+    return false;
+  };
+
+  // --- Add New Inquiry ---
+  window.openNewInquiryModal = function() {
+    $('#newInquiryForm')[0].reset();
+    const modal = new bootstrap.Modal(document.getElementById('modalNewInquiry'));
+    modal.show();
+  };
+
+  window.handleSaveInquiry = function(evt) {
+    evt.preventDefault();
+    const name = $('#niName').val().trim();
+    const phone = $('#niPhone').val().trim();
+    if (!name || !phone) return false;
+
+    INQUIRIES.push({
+      id: nextInquiryId(),
+      name, phone,
+      source: $('#niSource').val(),
+      service: $('#niService').val().trim() || 'General Inquiry',
+      date: $('#niDate').val() || '',
+      budget: $('#niBudget').val().trim() || 'TBD',
+      stage: 'new',
+      time: 'Just now'
+    });
+
+    renderInquiriesPipeline();
+    bootstrap.Modal.getInstance(document.getElementById('modalNewInquiry')).hide();
+    showToast('Inquiry Added', `${name} added to the New Leads column.`, 'success');
+    return false;
+  };
+
+  // --- Add New Crew Member ---
+  window.openNewStaffModal = function() {
+    $('#newStaffForm')[0].reset();
+    const $skills = $('#nsSkills');
+    $skills.empty();
+    SERVICE_CATALOG.forEach(sv => {
+      $skills.append(`<option value="${sv.id}">${sv.name}</option>`);
+    });
+    const modal = new bootstrap.Modal(document.getElementById('modalNewStaff'));
+    modal.show();
+  };
+
+  window.handleSaveStaff = function(evt) {
+    evt.preventDefault();
+    const name = $('#nsName').val().trim();
+    const role = $('#nsRole').val().trim();
+    const phone = $('#nsPhone').val().trim();
+    if (!name || !role || !phone) return false;
+    const skills = $('#nsSkills').val() || [];
+
+    STAFF_MEMBERS.push({
+      id: nextStaffId(),
+      name, role, skills,
+      avatar: initialsFromName(name),
+      color: pickAvatarColor(),
+      phone,
+      shoots: 0,
+      avail: true
+    });
+
+    renderStaffRoster();
+    $('#badgeStaffCount').text(`${STAFF_MEMBERS.length} Crew`);
+    bootstrap.Modal.getInstance(document.getElementById('modalNewStaff')).hide();
+    showToast('Crew Member Added', `${name} has joined the roster as ${role}.`, 'success');
+    return false;
+  };
+
+  // --- Record Payment ---
+  window.openRecordPaymentModal = function(presetBookingId) {
+    $('#recordPaymentForm')[0].reset();
+    const $select = $('#rpBookingId');
+    $select.empty();
+    BOOKINGS.filter(b => b.balanceDue > 0).forEach(b => {
+      $select.append(`<option value="${b.id}">${b.id} — ${b.customer} (Balance ₹${b.balanceDue.toLocaleString('en-IN')})</option>`);
+    });
+
+    if ($select.find('option').length === 0) {
+      $select.append(`<option value="">No outstanding balances</option>`);
+    } else if (presetBookingId) {
+      $select.val(presetBookingId);
+    }
+
+    updateRecordPaymentSummary();
+    const modal = new bootstrap.Modal(document.getElementById('modalRecordPayment'));
+    modal.show();
+  };
+
+  window.updateRecordPaymentSummary = function() {
+    const b = BOOKINGS.find(x => x.id === $('#rpBookingId').val());
+    const $summary = $('#rpSummary');
+    if (!b) {
+      $summary.html('<span class="text-muted">No booking selected.</span>');
+      return;
+    }
+    $summary.html(`
+      <div class="d-flex justify-content-between"><span class="text-muted">Total Package:</span><strong class="font-mono">₹${b.totalAmount.toLocaleString('en-IN')}</strong></div>
+      <div class="d-flex justify-content-between"><span class="text-muted">Already Paid:</span><strong class="font-mono text-success">₹${b.advancePaid.toLocaleString('en-IN')}</strong></div>
+      <div class="d-flex justify-content-between"><span class="text-muted">Balance Due:</span><strong class="font-mono text-amber">₹${b.balanceDue.toLocaleString('en-IN')}</strong></div>
+    `);
+    $('#rpAmount').attr('max', b.balanceDue);
+  };
+
+  window.handleRecordPayment = function(evt) {
+    evt.preventDefault();
+    const b = BOOKINGS.find(x => x.id === $('#rpBookingId').val());
+    if (!b) return false;
+
+    let amount = parseFloat($('#rpAmount').val());
+    if (!amount || amount <= 0) return false;
+    if (amount > b.balanceDue) amount = b.balanceDue;
+
+    b.advancePaid += amount;
+    b.balanceDue -= amount;
+    if (b.balanceDue <= 0) {
+      b.balanceDue = 0;
+      if (b.status !== 'delivered') b.status = 'confirmed';
+    }
+
+    renderPaymentsLedger();
+    renderBookingsTable();
+    renderDashboard();
+    bootstrap.Modal.getInstance(document.getElementById('modalRecordPayment')).hide();
+    showToast('Payment Recorded', `₹${amount.toLocaleString('en-IN')} (${$('#rpMode').val()}) recorded for ${b.customer}.`, 'success');
+    return false;
+  };
+
+  // --- Quick Search ---
+  window.openQuickSearchModal = function() {
+    $('#qsInput').val('');
+    $('#qsResults').empty();
+    const modal = new bootstrap.Modal(document.getElementById('modalQuickSearch'));
+    modal.show();
+    setTimeout(() => $('#qsInput').trigger('focus'), 300);
+  };
+
+  window.runQuickSearch = function() {
+    const q = $('#qsInput').val().trim().toLowerCase();
+    const $results = $('#qsResults');
+    $results.empty();
+
+    if (!q) {
+      $results.html('<div class="text-muted small text-center py-3">Start typing to search bookings, clients, and crew.</div>');
+      return;
+    }
+
+    let html = '';
+
+    BOOKINGS.filter(b => b.customer.toLowerCase().includes(q) || b.id.toLowerCase().includes(q) || b.phone.replace(/\D/g, '').includes(q.replace(/\D/g, '')))
+      .slice(0, 5)
+      .forEach(b => {
+        html += `
+          <div class="p-2 rounded bg-surface-2 border d-flex justify-content-between align-items-center" style="cursor:pointer" onclick="$('#modalQuickSearch').modal('hide'); showEventDetailModal('${b.id}');">
+            <div>
+              <span class="badge bg-primary-subtle text-primary me-2">Booking</span>
+              <strong>${b.customer}</strong> <span class="text-muted small">— ${b.id} • ${b.eventType}</span>
+            </div>
+            <i class="fa-solid fa-chevron-right text-muted small"></i>
+          </div>`;
+      });
+
+    CUSTOMERS.filter(c => c.name.toLowerCase().includes(q) || c.phone.replace(/\D/g, '').includes(q.replace(/\D/g, '')))
+      .slice(0, 5)
+      .forEach(c => {
+        html += `
+          <div class="p-2 rounded bg-surface-2 border d-flex justify-content-between align-items-center" style="cursor:pointer" onclick="$('#modalQuickSearch').modal('hide'); switchTab('customers');">
+            <div>
+              <span class="badge bg-cyan-subtle text-cyan me-2">Client</span>
+              <strong>${c.name}</strong> <span class="text-muted small">— ${c.phone}</span>
+            </div>
+            <i class="fa-solid fa-chevron-right text-muted small"></i>
+          </div>`;
+      });
+
+    STAFF_MEMBERS.filter(s => s.name.toLowerCase().includes(q) || s.role.toLowerCase().includes(q))
+      .slice(0, 5)
+      .forEach(s => {
+        html += `
+          <div class="p-2 rounded bg-surface-2 border d-flex justify-content-between align-items-center" style="cursor:pointer" onclick="$('#modalQuickSearch').modal('hide'); switchTab('staff');">
+            <div>
+              <span class="badge bg-purple-subtle text-purple me-2">Crew</span>
+              <strong>${s.name}</strong> <span class="text-muted small">— ${s.role}</span>
+            </div>
+            <i class="fa-solid fa-chevron-right text-muted small"></i>
+          </div>`;
+      });
+
+    $results.html(html || '<div class="text-muted small text-center py-3">No matches found.</div>');
   };
 
   // =========================================================================
