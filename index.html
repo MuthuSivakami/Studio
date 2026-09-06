@@ -20,9 +20,9 @@
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css"/>
   
   <!-- Custom Advanced CSS -->
-  <link rel="stylesheet" href="styles.css">
+  <link rel="stylesheet" href="style.css">
 </head>
-<body class="theme-dark desktop-mode" id="appBody">
+<body class="theme-light desktop-mode" id="appBody">
 
   <!-- TOP APP SWITCHER & ENVIRONMENT BAR -->
   <header class="top-device-bar px-3 py-2 d-flex justify-content-between align-items-center border-bottom">
@@ -61,7 +61,7 @@
       </button>
       
       <button class="btn btn-sm btn-icon rounded-circle" id="themeToggleBtn" onclick="toggleTheme()" title="Toggle Theme">
-        <i class="fa-solid fa-sun text-warning" id="themeIcon"></i>
+        <i class="fa-solid fa-moon text-primary" id="themeIcon"></i>
       </button>
 
       <div class="dropdown">
@@ -139,7 +139,7 @@
               <i class="fa-solid fa-id-badge nav-icon text-purple"></i>
               <span class="nav-label">Crew Assignment & Duty</span>
             </span>
-            <span class="badge bg-purple-subtle text-purple rounded-pill small">6 Crew</span>
+            <span class="badge bg-purple-subtle text-purple rounded-pill small" id="badgeStaffCount">6 Crew</span>
           </a>
 
           <a class="nav-link d-flex align-items-center justify-content-between" href="#payments" onclick="switchTab('payments')">
@@ -968,6 +968,192 @@
               <i class="fa-brands fa-whatsapp me-1"></i> Send WhatsApp Call Sheet
             </button>
           </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ========================================================================= -->
+  <!-- MODAL: ADD NEW CLIENT -->
+  <!-- ========================================================================= -->
+  <div class="modal fade" id="modalNewCustomer" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+      <div class="modal-content bg-surface border-0 shadow-2xl">
+        <div class="modal-header border-bottom p-3">
+          <h5 class="modal-title fw-bold"><i class="fa-solid fa-address-book text-primary me-2"></i>Add New Client</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <form id="newCustomerForm" onsubmit="return handleSaveCustomer(event)">
+          <div class="modal-body p-3 p-md-4">
+            <div class="mb-3">
+              <label class="form-label small fw-semibold">Client Name</label>
+              <input type="text" class="form-control" id="ncName" required placeholder="e.g. Aarav &amp; Isha">
+            </div>
+            <div class="mb-3">
+              <label class="form-label small fw-semibold">Phone</label>
+              <input type="tel" class="form-control" id="ncPhone" required placeholder="+91 98765 43210">
+            </div>
+            <div class="mb-3">
+              <label class="form-label small fw-semibold">Email</label>
+              <input type="email" class="form-control" id="ncEmail" placeholder="client@example.com">
+            </div>
+          </div>
+          <div class="modal-footer border-top p-3">
+            <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Cancel</button>
+            <button type="submit" class="btn btn-primary"><i class="fa-solid fa-check me-1"></i> Save Client</button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <!-- ========================================================================= -->
+  <!-- MODAL: ADD NEW INQUIRY -->
+  <!-- ========================================================================= -->
+  <div class="modal fade" id="modalNewInquiry" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+      <div class="modal-content bg-surface border-0 shadow-2xl">
+        <div class="modal-header border-bottom p-3">
+          <h5 class="modal-title fw-bold"><i class="fa-solid fa-funnel-dollar text-emerald me-2"></i>Add New Inquiry</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <form id="newInquiryForm" onsubmit="return handleSaveInquiry(event)">
+          <div class="modal-body p-3 p-md-4">
+            <div class="mb-3">
+              <label class="form-label small fw-semibold">Lead Name</label>
+              <input type="text" class="form-control" id="niName" required placeholder="e.g. Neha &amp; Arjun">
+            </div>
+            <div class="mb-3">
+              <label class="form-label small fw-semibold">Phone</label>
+              <input type="tel" class="form-control" id="niPhone" required placeholder="+91 99111 00001">
+            </div>
+            <div class="row g-3 mb-3">
+              <div class="col-6">
+                <label class="form-label small fw-semibold">Source</label>
+                <select class="form-select" id="niSource">
+                  <option>Instagram DM</option>
+                  <option>Google Ads</option>
+                  <option>WhatsApp</option>
+                  <option>Client Referral</option>
+                  <option>Website Form</option>
+                  <option>Walk-In</option>
+                </select>
+              </div>
+              <div class="col-6">
+                <label class="form-label small fw-semibold">Tentative Date</label>
+                <input type="date" class="form-control" id="niDate">
+              </div>
+            </div>
+            <div class="mb-3">
+              <label class="form-label small fw-semibold">Service Interested In</label>
+              <input type="text" class="form-control" id="niService" placeholder="e.g. Wedding Photo + Cinema">
+            </div>
+            <div class="mb-3">
+              <label class="form-label small fw-semibold">Estimated Budget</label>
+              <input type="text" class="form-control" id="niBudget" placeholder="e.g. ₹1.5L">
+            </div>
+          </div>
+          <div class="modal-footer border-top p-3">
+            <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Cancel</button>
+            <button type="submit" class="btn btn-primary"><i class="fa-solid fa-check me-1"></i> Save Inquiry</button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <!-- ========================================================================= -->
+  <!-- MODAL: ADD NEW CREW MEMBER -->
+  <!-- ========================================================================= -->
+  <div class="modal fade" id="modalNewStaff" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+      <div class="modal-content bg-surface border-0 shadow-2xl">
+        <div class="modal-header border-bottom p-3">
+          <h5 class="modal-title fw-bold"><i class="fa-solid fa-id-badge text-purple me-2"></i>Add Crew Member</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <form id="newStaffForm" onsubmit="return handleSaveStaff(event)">
+          <div class="modal-body p-3 p-md-4">
+            <div class="mb-3">
+              <label class="form-label small fw-semibold">Name</label>
+              <input type="text" class="form-control" id="nsName" required placeholder="e.g. Divya Rao">
+            </div>
+            <div class="mb-3">
+              <label class="form-label small fw-semibold">Role</label>
+              <input type="text" class="form-control" id="nsRole" required placeholder="e.g. Lead Photographer">
+            </div>
+            <div class="mb-3">
+              <label class="form-label small fw-semibold">Phone</label>
+              <input type="tel" class="form-control" id="nsPhone" required placeholder="+91 98111 22334">
+            </div>
+            <div class="mb-3">
+              <label class="form-label small fw-semibold">Skills / Services</label>
+              <select class="form-select" id="nsSkills" multiple size="4"></select>
+              <small class="text-muted">Hold Ctrl / Cmd to select multiple services.</small>
+            </div>
+          </div>
+          <div class="modal-footer border-top p-3">
+            <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Cancel</button>
+            <button type="submit" class="btn btn-primary"><i class="fa-solid fa-check me-1"></i> Save Crew Member</button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <!-- ========================================================================= -->
+  <!-- MODAL: RECORD PAYMENT -->
+  <!-- ========================================================================= -->
+  <div class="modal fade" id="modalRecordPayment" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+      <div class="modal-content bg-surface border-0 shadow-2xl">
+        <div class="modal-header border-bottom p-3">
+          <h5 class="modal-title fw-bold"><i class="fa-solid fa-hand-holding-dollar text-success me-2"></i>Record Payment</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <form id="recordPaymentForm" onsubmit="return handleRecordPayment(event)">
+          <div class="modal-body p-3 p-md-4">
+            <div class="mb-3">
+              <label class="form-label small fw-semibold">Booking</label>
+              <select class="form-select" id="rpBookingId" onchange="updateRecordPaymentSummary()" required></select>
+            </div>
+            <div class="p-2 rounded bg-surface-2 border mb-3 smaller" id="rpSummary"></div>
+            <div class="mb-3">
+              <label class="form-label small fw-semibold">Amount Received (₹)</label>
+              <input type="number" min="1" step="1" class="form-control" id="rpAmount" required placeholder="e.g. 25000">
+            </div>
+            <div class="mb-3">
+              <label class="form-label small fw-semibold">Payment Mode</label>
+              <select class="form-select" id="rpMode">
+                <option>UPI</option>
+                <option>Bank Transfer</option>
+                <option>Cash</option>
+                <option>Card</option>
+              </select>
+            </div>
+          </div>
+          <div class="modal-footer border-top p-3">
+            <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Cancel</button>
+            <button type="submit" class="btn btn-success"><i class="fa-solid fa-check me-1"></i> Record Payment</button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <!-- ========================================================================= -->
+  <!-- MODAL: QUICK SEARCH -->
+  <!-- ========================================================================= -->
+  <div class="modal fade" id="modalQuickSearch" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+      <div class="modal-content bg-surface border-0 shadow-2xl">
+        <div class="modal-header border-bottom p-3">
+          <h5 class="modal-title fw-bold"><i class="fa-solid fa-magnifying-glass text-primary me-2"></i>Quick Search</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <div class="modal-body p-3 p-md-4">
+          <input type="text" class="form-control mb-3" id="qsInput" placeholder="Search bookings, clients, or crew by name / phone / ID..." oninput="runQuickSearch()" autocomplete="off">
+          <div id="qsResults" class="d-flex flex-column gap-2"></div>
         </div>
       </div>
     </div>
